@@ -39,6 +39,7 @@ const initialState = {
   document_number: '',
   issuing_country: '',
   phone_number: '',
+  openchat_id: '',
   document_file: null,
 };
 
@@ -93,7 +94,7 @@ const FormTabs = () => {
         <TabContext value={value}>
           <Box sx={{ borderBottom: 1, borderColor: (theme) => theme.palette.divider }}>
             <TabList onChange={handleChange} aria-label="lab API tabs example" variant="scrollable" scrollButtons="auto">
-              <Tab label="Personal Detail" value="1" />
+              <Tab label="Personal Details" value="1" />
               <Tab label="Address Details" value="2" />
               <Tab label="Document Details" value="3" />
             </TabList>
@@ -158,7 +159,6 @@ const FormTabs = () => {
                   <MenuItem value="2">Female</MenuItem>
                   <MenuItem value="9">Not applicable</MenuItem>
                 </Select>
-
               </Grid>
             </Grid>
           </TabPanel>
@@ -180,7 +180,14 @@ const FormTabs = () => {
                   </Tooltip>
                 </CustomFormLabel>
                 <TextField id="email" placeholder="user@gmail.com" fullWidth onChange={handleInputChange} />
-              
+
+                <CustomFormLabel htmlFor="openchat_id" sx={{ mt: 2 }} className="center">
+                  OpenChat ID
+                  <Tooltip title="Your OpenChat ID" placement="top" cursor="pointer">
+                    <ErrorOutlineIcon />
+                  </Tooltip>
+                </CustomFormLabel>
+                <TextField id="birth_place" fullWidth onChange={handleInputChange} />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <CustomFormLabel htmlFor="resident_country" sx={{ mt: 3 }} className="center">
@@ -293,7 +300,7 @@ const FormTabs = () => {
               </label>
               {documentPreview && (
                 <Box mt={2}>
-                  <img src={documentPreview} alt="Document Preview" style={{ width: '100%', maxWidth: '150px', borderRadius: '10px', border: '1px solid #ccc' }} />
+                  <img src={documentPreview} alt="Document Preview" style={{ width: '100%', maxWidth: '150px',maxHeight: '150px',height: 'auto', borderRadius: '10px', border: '1px solid #ccc' }} />
                 </Box>
               )}
             </Box>
