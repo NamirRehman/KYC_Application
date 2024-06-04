@@ -145,7 +145,7 @@ const FormTabs = () => {
                   </Tooltip>
                 </CustomFormLabel>
                 <TextField id="birth_place" fullWidth onChange={handleInputChange} />
-                
+
                 <CustomFormLabel htmlFor="gender" sx={{ mt: 2 }} className="center">
                   Gender
                   <Tooltip title="PID User's gender, using a value as defined in ISO/IEC 5218." placement="top" cursor="pointer">
@@ -288,7 +288,7 @@ const FormTabs = () => {
                 id="file-upload"
                 style={{ display: 'none' }}
               />
-              <label htmlFor="file-upload" style={{ cursor: 'pointer' }}>
+              <label htmlFor="file-upload" style={{ cursor: 'pointer',fontWeight: 'bold' }}>
                 Drag and drop file OR &nbsp;<span style={{ color: '#1976d2', textDecoration: 'underline' }}>SELECT</span>
               </label>
               {documentPreview && (
