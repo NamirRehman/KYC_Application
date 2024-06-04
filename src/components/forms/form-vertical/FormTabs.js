@@ -3,8 +3,6 @@ import {
   Box,
   Button,
   Grid,
-  IconButton,
-  InputAdornment,
   MenuItem,
   Stack,
   Tab,
@@ -19,8 +17,8 @@ import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import BlankCard from '../../shared/BlankCard';
 import CustomFormLabel from '../theme-elements/CustomFormLabel';
-import { IconEye, IconEyeOff } from '@tabler/icons';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+
 const countries = [
   { value: 'IN', label: 'India' },
   { value: 'UK', label: 'United Kingdom' },
@@ -33,36 +31,21 @@ const initialState = {
   given_name: '',
   birth_date: '',
   age_over_18: '',
-  age_over_NN: '',
-  given_name_birth: '',
-  birth_city: '',
   gender: '',
   issuance_date: '',
-  age_in_years: '',
-  age_birth_years: '',
-  family_name_birth: '',
-  birth_country: '',
-  birth_state: '',
-  birth_place: '',
   expiry_date: '',
   resident_address: '',
   resident_country: '',
-  resident_state: '',
-  resident_city: '',
-  resident_postal_code: '',
-  resident_street: '',
-  resident_house_number: '',
   document_number: '',
-  administrative_number: '',
-  issuing_jurisdiction: '',
-  issuing_country: ''
+  issuing_country: '',
+  phone_number: '',
+  document_file: null,
 };
 
 const FormTabs = () => {
   const [value, setValue] = useState('1');
   const [formData, setFormData] = useState(initialState);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showPassword2, setShowPassword2] = useState(false);
+  const [documentPreview, setDocumentPreview] = useState(null);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -76,17 +59,21 @@ const FormTabs = () => {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFormData((prevData) => ({
+      ...prevData,
+      document_file: file,
+    }));
+    setDocumentPreview(URL.createObjectURL(file));
+  };
+
   const handleSelectChange = (id) => (event) => {
     setFormData((prevData) => ({
       ...prevData,
       [id]: event.target.value,
     }));
   };
-
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-  const handleMouseDownPassword = (event) => event.preventDefault();
-  const handleClickShowPassword2 = () => setShowPassword2((show) => !show);
-  const handleMouseDownPassword2 = (event) => event.preventDefault();
 
   const isFormValid = () => {
     return Object.values(formData).every((field) => field.trim() !== '');
@@ -106,7 +93,7 @@ const FormTabs = () => {
         <TabContext value={value}>
           <Box sx={{ borderBottom: 1, borderColor: (theme) => theme.palette.divider }}>
             <TabList onChange={handleChange} aria-label="lab API tabs example" variant="scrollable" scrollButtons="auto">
-              <Tab label="Personal Info" value="1" />
+              <Tab label="Personal Detail" value="1" />
               <Tab label="Address Details" value="2" />
               <Tab label="Document Details" value="3" />
             </TabList>
@@ -114,22 +101,6 @@ const FormTabs = () => {
           <TabPanel value="1">
             <Grid container spacing={3}>
               <Grid item xs={12} lg={6}>
-                <CustomFormLabel htmlFor="family_name" className="center">
-                  Family Name
-                  <Tooltip title="Current last name(s) or surname(s) of the PID User." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="family_name" placeholder="Doe" fullWidth onChange={handleInputChange} />
-
-                <CustomFormLabel htmlFor="email" className="center">
-                  Email
-                  <Tooltip title="User Email" placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="email" placeholder="user@gmail.com" fullWidth onChange={handleInputChange} />
-
                 <CustomFormLabel htmlFor="given_name" sx={{ mt: 2 }} className="center">
                   Given Name
                   <Tooltip title="Current first name(s), including middle name(s), of the PID User." placement="top" cursor="pointer">
@@ -139,7 +110,7 @@ const FormTabs = () => {
                 <TextField id="given_name" placeholder="John" fullWidth onChange={handleInputChange} />
 
                 <CustomFormLabel htmlFor="birth_date" sx={{ mt: 2 }} className="center">
-                  Birth Date
+                  Date of Birth
                   <Tooltip title="Day, month, and year on which the PID User was born." placement="top" cursor="pointer">
                     <ErrorOutlineIcon />
                   </Tooltip>
@@ -156,75 +127,17 @@ const FormTabs = () => {
                   <MenuItem value="true">True</MenuItem>
                   <MenuItem value="false">False</MenuItem>
                 </Select>
-                <CustomFormLabel htmlFor="age_over_NN" sx={{ mt: 2 }} className="center">
-                  Age Over NN
-                  <Tooltip title="Additional current age attestations, NN < 18." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <Select id="age_over_NN" fullWidth onChange={handleSelectChange('age_over_NN')} value={formData.age_over_NN}>
-                  <MenuItem value="true">True</MenuItem>
-                  <MenuItem value="false">False</MenuItem>
-                </Select>
-
-                <CustomFormLabel htmlFor="given_name_birth" sx={{ mt: 2 }} className="center">
-                  Given Birth Name
-                  <Tooltip title="First name(s), including middle name(s), of the PID User at the time of birth." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="given_name_birth" fullWidth onChange={handleInputChange} />
-
-                <CustomFormLabel htmlFor="birth_city" sx={{ mt: 2 }} className="center">
-                  Birth City
-                  <Tooltip title="The municipality, city, town, or village where the PID User was born." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="birth_city" fullWidth onChange={handleInputChange} />
 
               </Grid>
               <Grid item xs={12} lg={6}>
-                <CustomFormLabel htmlFor="age_in_years" className="center">
-                  Age in Years
-                  <Tooltip title="The current age of the PID User in years." placement="top" cursor="pointer">
+                <CustomFormLabel htmlFor="family_name" className="center">
+                  Family Name
+                  <Tooltip title="Current last name(s) or surname(s) of the PID User." placement="top" cursor="pointer">
                     <ErrorOutlineIcon />
                   </Tooltip>
                 </CustomFormLabel>
-                <TextField id="age_in_years" placeholder="30" fullWidth onChange={handleInputChange} />
-
-                <CustomFormLabel htmlFor="age_birth_years" className="center">
-                  Age Birth Years
-                  <Tooltip title="The year when the PID User was born." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="age_birth_years" placeholder="0" fullWidth onChange={handleInputChange} />
-
-                <CustomFormLabel htmlFor="family_name_birth" className="center">
-                  Family Name Birth
-                  <Tooltip title="Last name(s) or surname(s) of the PID User at the time of birth." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="family_name_birth" placeholder="John" fullWidth onChange={handleInputChange} />
-
-                <CustomFormLabel htmlFor="birth_country" className="center">
-                  Birth Country
-                  <Tooltip title="The country where the PID User was born, as an Alpha-2 country code as specified in ISO 3166-1." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="birth_country" placeholder="USA" fullWidth onChange={handleInputChange} />
-
-                <CustomFormLabel htmlFor="birth_state" className="center">
-                  Birth State
-                  <Tooltip title="The state, province, district, or local area where the PID User was born." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="birth_state" placeholder="" fullWidth onChange={handleInputChange} />
-
+                <TextField id="family_name" placeholder="Doe" fullWidth onChange={handleInputChange} />
+                
                 <CustomFormLabel htmlFor="birth_place" sx={{ mt: 2 }} className="center">
                   Birth Place
                   <Tooltip title="The country, state, and city where the PID User was born." placement="top" cursor="pointer">
@@ -232,7 +145,7 @@ const FormTabs = () => {
                   </Tooltip>
                 </CustomFormLabel>
                 <TextField id="birth_place" fullWidth onChange={handleInputChange} />
-
+                
                 <CustomFormLabel htmlFor="gender" sx={{ mt: 2 }} className="center">
                   Gender
                   <Tooltip title="PID User's gender, using a value as defined in ISO/IEC 5218." placement="top" cursor="pointer">
@@ -245,6 +158,7 @@ const FormTabs = () => {
                   <MenuItem value="2">Female</MenuItem>
                   <MenuItem value="9">Not applicable</MenuItem>
                 </Select>
+
               </Grid>
             </Grid>
           </TabPanel>
@@ -259,7 +173,17 @@ const FormTabs = () => {
                 </CustomFormLabel>
                 <TextField id="resident_address" placeholder="123 Main St" fullWidth onChange={handleInputChange} />
 
-                <CustomFormLabel htmlFor="resident_country" sx={{ mt: 2 }} className="center">
+                <CustomFormLabel htmlFor="email" className="center">
+                  Email Address
+                  <Tooltip title="User Email" placement="top" cursor="pointer">
+                    <ErrorOutlineIcon />
+                  </Tooltip>
+                </CustomFormLabel>
+                <TextField id="email" placeholder="user@gmail.com" fullWidth onChange={handleInputChange} />
+              
+              </Grid>
+              <Grid item xs={12} lg={6}>
+                <CustomFormLabel htmlFor="resident_country" sx={{ mt: 3 }} className="center">
                   Resident Country
                   <Tooltip title="The country where the PID User currently resides, as an Alpha-2 country code as specified in ISO 3166-1." placement="top" cursor="pointer">
                     <ErrorOutlineIcon />
@@ -273,51 +197,18 @@ const FormTabs = () => {
                   ))}
                 </Select>
 
-                <CustomFormLabel htmlFor="resident_state" sx={{ mt: 2 }} className="center">
-                  Resident State
-                  <Tooltip title="The state, province, district, or local area where the PID User currently resides." placement="top" cursor="pointer">
+                <CustomFormLabel htmlFor="phone_number" className="center">
+                  Phone Number
+                  <Tooltip title="User Phone Number" placement="top" cursor="pointer">
                     <ErrorOutlineIcon />
                   </Tooltip>
                 </CustomFormLabel>
-                <TextField id="resident_state" placeholder="California" fullWidth onChange={handleInputChange} />
-
-                <CustomFormLabel htmlFor="resident_city" sx={{ mt: 2 }} className="center">
-                  Resident City
-                  <Tooltip title="The municipality, city, town, or village where the PID User currently resides." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="resident_city" placeholder="Los Angeles" fullWidth onChange={handleInputChange} />
-              </Grid>
-              <Grid item xs={12} lg={6}>
-                <CustomFormLabel htmlFor="resident_postal_code" className="center">
-                  Resident Postal Code
-                  <Tooltip title="Postal code of the place where the PID User currently resides." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="resident_postal_code" placeholder="90001" fullWidth onChange={handleInputChange} />
-
-                <CustomFormLabel htmlFor="resident_street" sx={{ mt: 2 }} className="center">
-                  Resident Street
-                  <Tooltip title="The name of the street where the PID User currently resides." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="resident_street" placeholder="Main St" fullWidth onChange={handleInputChange} />
-
-                <CustomFormLabel htmlFor="resident_house_number" sx={{ mt: 2 }} className="center">
-                  House Number
-                  <Tooltip title="The house number where the PID User currently resides, including any affix or suffix." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="resident_house_number" placeholder="123" fullWidth onChange={handleInputChange} />
+                <TextField id="phone_number" placeholder="+271-0099-221" fullWidth onChange={handleInputChange} />
               </Grid>
             </Grid>
           </TabPanel>
           <TabPanel value="3">
-            <Grid container spacing={3}>
+          <Grid container spacing={3}>
               <Grid item xs={12} lg={6}>
                 <CustomFormLabel htmlFor="document_number" className="center">
                   Document Number
@@ -326,14 +217,6 @@ const FormTabs = () => {
                   </Tooltip>
                 </CustomFormLabel>
                 <TextField id="document_number" placeholder="A1234567" fullWidth onChange={handleInputChange} />
-
-                <CustomFormLabel htmlFor="administrative_number" className="center">
-                  Administrative Number
-                  <Tooltip title="A number assigned by the PID Provider for audit control or other purposes." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="administrative_number" placeholder="A1234567" fullWidth onChange={handleInputChange} />
 
                 <CustomFormLabel htmlFor="issuance_date" className="center">
                   Personal ID Issue Date
@@ -344,15 +227,7 @@ const FormTabs = () => {
                 <TextField type="date" id="issuance_date" placeholder="" fullWidth onChange={handleInputChange} />
               </Grid>
               <Grid item xs={12} lg={6}>
-                <CustomFormLabel htmlFor="issuing_jurisdiction" className="center">
-                  Issuing Jurisdiction
-                  <Tooltip title="Country subdivision code of the jurisdiction that issued the PID, as defined in ISO 3166-2:2020, Clause 8. The first part of the code SHALL be the same as the value for issuing_country." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="issuing_jurisdiction" placeholder="Government Jurisdiction" fullWidth onChange={handleInputChange} />
-
-                <CustomFormLabel htmlFor="issuing_country" sx={{ mt: 2 }} className="center">
+                <CustomFormLabel htmlFor="issuing_country" sx={{ mt: 2, mb:2 }} className="center">
                   Issuing Country
                   <Tooltip title="Alpha-2 country code, as defined in ISO 3166-1, of the PID Provider's country or territory." placement="top" cursor="pointer">
                     <ErrorOutlineIcon />
@@ -361,11 +236,11 @@ const FormTabs = () => {
                 <Select id="issuing_country" fullWidth onChange={handleSelectChange('issuing_country')} value={formData.issuing_country}>
                   {countries.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
-                      {option.label}
+                      {option.value}
                     </MenuItem>
                   ))}
                 </Select>
-                <CustomFormLabel htmlFor="expiry_date" className="center">
+                <CustomFormLabel htmlFor="expiry_date" className="center" sx={{ mt: 3 }} >
                   Personal ID Expiry Date
                   <Tooltip title="Date (and possibly time) when the PID will expire." placement="top" cursor="pointer">
                     <ErrorOutlineIcon />
@@ -374,6 +249,54 @@ const FormTabs = () => {
                 <OutlinedInput type="date" id="expiry_date" placeholder="" fullWidth onChange={handleInputChange} />
               </Grid>
             </Grid>
+            <Typography variant="h6" mb={2} mt={4}>
+              In order to complete, please upload any of the following personal document.
+            </Typography>
+            <Stack direction="row" spacing={2} mb={2}>
+              <Button variant="outlined">National Identity Card</Button>
+              <Button variant="outlined">Passport</Button>
+              <Button variant="outlined" color="primary">Driver's License</Button>
+            </Stack>
+            <Typography variant="body2" mb={2}>
+              To avoid delays when verifying account, Please make sure below:
+            </Typography>
+            <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
+              <li>✓ Chosen credential must not be expired.</li>
+              <li>✓ Document should be good condition and clearly visible.</li>
+              <li>✓ Make sure that there is no light glare on the card.</li>
+            </ul>
+            <Typography variant="body1" mb={2}>
+              Upload Here Your Driving License Copy
+            </Typography>
+            <Box
+              sx={{
+                border: '2px dashed #ccc',
+                borderRadius: '10px',
+                padding: '20px',
+                textAlign: 'center',
+                cursor: 'pointer',
+                transition: 'border 0.3s',
+                '&:hover': {
+                  borderColor: '#666',
+                },
+              }}
+            >
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                id="file-upload"
+                style={{ display: 'none' }}
+              />
+              <label htmlFor="file-upload" style={{ cursor: 'pointer' }}>
+                Drag and drop file OR &nbsp;<span style={{ color: '#1976d2', textDecoration: 'underline' }}>SELECT</span>
+              </label>
+              {documentPreview && (
+                <Box mt={2}>
+                  <img src={documentPreview} alt="Document Preview" style={{ width: '100%', maxWidth: '150px', borderRadius: '10px', border: '1px solid #ccc' }} />
+                </Box>
+              )}
+            </Box>
           </TabPanel>
         </TabContext>
       </BlankCard>
