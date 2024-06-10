@@ -4,7 +4,9 @@ import {
   Button,
   Grid,
   Stack,
-  Tab,
+  Stepper,
+  Step,
+  StepLabel,
   Typography,
   Select,
   MenuItem,
@@ -12,14 +14,16 @@ import {
   OutlinedInput,
   Tooltip,
   Checkbox,
-  FormControlLabel
+  FormControlLabel,
+  Alert
 } from '@mui/material';
-import TabContext from '@mui/lab/TabContext';
-import TabList from '@mui/lab/TabList';
-import TabPanel from '@mui/lab/TabPanel';
 import BlankCard from '../../shared/BlankCard';
 import CustomFormLabel from '../theme-elements/CustomFormLabel';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ParentCard from '../../../components/shared/ParentCard';
+import PageContainer from '../../../components/container/PageContainer';
+import Breadcrumb from '../../../layouts/full/shared/breadcrumb/Breadcrumb';
+// import WebcamCapture from '../../../WebCapture';
 
 const countries = [
   { value: 'IN', label: 'India' },
@@ -46,13 +50,36 @@ const initialState = {
   document_file: null,
 };
 
+const steps = ['Personal Details', 'Address Details', 'Document Details', 'Capture Image'];
+
 const FormTabs = () => {
-  const [value, setValue] = useState('1');
+  const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState(initialState);
   const [documentPreview, setDocumentPreview] = useState(null);
+  const [image, setImage] = useState(null);
+  const [skipped, setSkipped] = useState(new Set());
 
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
+  const isStepOptional = (step) => false;
+  const isStepSkipped = (step) => skipped.has(step);
+
+  const handleNext = () => {
+    let newSkipped = skipped;
+    if (isStepSkipped(activeStep)) {
+      newSkipped = new Set(newSkipped.values());
+      newSkipped.delete(activeStep);
+    }
+
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    setSkipped(newSkipped);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleReset = () => {
+    setActiveStep(0);
+    setFormData(initialState);
   };
 
   const handleInputChange = (e) => {
@@ -60,6 +87,14 @@ const FormTabs = () => {
     setFormData((prevData) => ({
       ...prevData,
       [id]: value,
+    }));
+  };
+
+  const handleCheckboxChange = (e) => {
+    const { id, checked } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: checked,
     }));
   };
 
@@ -72,14 +107,6 @@ const FormTabs = () => {
     setDocumentPreview(URL.createObjectURL(file));
   };
 
-  const handleCheckboxChange = (e) => {
-    const { id, checked } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [id]: checked,
-    }));
-  };
-
   const handleSelectChange = (id) => (event) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -87,31 +114,42 @@ const FormTabs = () => {
     }));
   };
 
-  const isFormValid = () => {
-    return Object.values(formData).every((field) => field !== '' && field !== null);
+  const isFormValid = (step) => {
+    switch (step) {
+      case 0:
+        return formData.given_name && formData.family_name && formData.birth_date && formData.gender && formData.nationality;
+      case 1:
+        return formData.resident_address && formData.email && formData.openchat_id && formData.resident_country && formData.phone_number;
+      case 2:
+        return formData.document_number && formData.issuance_date && formData.expiry_date && formData.issuing_country && formData.document_file;
+      case 3:
+        return image;
+      default:
+        return false;
+    }
   };
 
-  const handleSubmit = () => {
-    // Handle form submission
-    console.log('Form Submitted', formData);
+  const handleSubmitStep = () => {
+    console.log('Step Submitted', formData);
+    handleNext();
   };
 
-  return (
-    <div>
-      <Typography variant="h2" mb={2} mt={2}>
-        KYC Form
-      </Typography>
-      <BlankCard>
-        <TabContext value={value}>
-          <Box sx={{ borderBottom: 1, borderColor: (theme) => theme.palette.divider }}>
-            <TabList onChange={handleChange} aria-label="lab API tabs example" variant="scrollable" scrollButtons="auto">
-              <Tab label="Personal Details" value="1" />
-              <Tab label="Address Details" value="2" />
-              <Tab label="Document Details" value="3" />
-              <Tab label="Capture Image" value="4" />
-            </TabList>
-          </Box>
-          <TabPanel value="1">
+  const handleCapture = async (imageSrc) => {
+    setImage(imageSrc);
+
+    try {
+      // Add your logic to handle the image capture here
+      console.log("Captured Image: ", imageSrc);
+    } catch (error) {
+      console.error("There was a problem with the capture operation:", error);
+    }
+  };
+
+  const handleSteps = (step) => {
+    switch (step) {
+      case 0:
+        return (
+          <Box>
             <Grid container spacing={3}>
               <Grid item xs={12} lg={6}>
                 <CustomFormLabel htmlFor="given_name" sx={{ mt: 2 }} className="center">
@@ -120,7 +158,7 @@ const FormTabs = () => {
                     <ErrorOutlineIcon />
                   </Tooltip>
                 </CustomFormLabel>
-                <TextField id="given_name" placeholder="John" fullWidth onChange={handleInputChange} />
+                <TextField id="given_name" placeholder="John" fullWidth onChange={handleInputChange} value={formData.given_name} />
 
                 <Grid container spacing={3}>
                   <Grid item xs={6}>
@@ -130,7 +168,7 @@ const FormTabs = () => {
                         <ErrorOutlineIcon />
                       </Tooltip>
                     </CustomFormLabel>
-                    <TextField type="date" id="birth_date" fullWidth onChange={handleInputChange} />
+                    <TextField type="date" id="birth_date" fullWidth onChange={handleInputChange} value={formData.birth_date} />
                   </Grid>
                   <Grid item xs={6}>
                     <CustomFormLabel htmlFor="age_over_18" sx={{ mt: 2 }} className="center">
@@ -174,7 +212,7 @@ const FormTabs = () => {
                     <ErrorOutlineIcon />
                   </Tooltip>
                 </CustomFormLabel>
-                <TextField id="family_name" placeholder="Doe" fullWidth onChange={handleInputChange} />
+                <TextField id="family_name" placeholder="Doe" fullWidth onChange={handleInputChange} value={formData.family_name} />
 
                 <CustomFormLabel htmlFor="birth_place" sx={{ mt: 2 }} className="center">
                   Birth Place
@@ -182,7 +220,7 @@ const FormTabs = () => {
                     <ErrorOutlineIcon />
                   </Tooltip>
                 </CustomFormLabel>
-                <TextField id="birth_place" fullWidth onChange={handleInputChange} />
+                <TextField id="birth_place" fullWidth onChange={handleInputChange} value={formData.birth_place} />
 
                 <CustomFormLabel htmlFor="gender" sx={{ mt: 2 }} className="center">
                   Gender
@@ -197,8 +235,11 @@ const FormTabs = () => {
                 </Select>
               </Grid>
             </Grid>
-          </TabPanel>
-          <TabPanel value="2">
+          </Box>
+        );
+      case 1:
+        return (
+          <Box>
             <Grid container spacing={3}>
               <Grid item xs={12} lg={6}>
                 <CustomFormLabel htmlFor="resident_address" className="center">
@@ -214,6 +255,7 @@ const FormTabs = () => {
                   onChange={handleInputChange}
                   multiline
                   rows={4}
+                  value={formData.resident_address}
                 />
 
                 <CustomFormLabel htmlFor="email" className="center">
@@ -222,7 +264,7 @@ const FormTabs = () => {
                     <ErrorOutlineIcon />
                   </Tooltip>
                 </CustomFormLabel>
-                <TextField id="email" placeholder="user@gmail.com" fullWidth onChange={handleInputChange} />
+                <TextField id="email" placeholder="user@gmail.com" fullWidth onChange={handleInputChange} value={formData.email} />
 
                 <CustomFormLabel htmlFor="openchat_id" sx={{ mt: 2 }} className="center">
                   OpenChat ID
@@ -230,7 +272,7 @@ const FormTabs = () => {
                     <ErrorOutlineIcon />
                   </Tooltip>
                 </CustomFormLabel>
-                <TextField id="birth_place" fullWidth onChange={handleInputChange} />
+                <TextField id="openchat_id" fullWidth onChange={handleInputChange} value={formData.openchat_id} />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <CustomFormLabel htmlFor="resident_country" sx={{ mt: 3 }} className="center">
@@ -253,11 +295,14 @@ const FormTabs = () => {
                     <ErrorOutlineIcon />
                   </Tooltip>
                 </CustomFormLabel>
-                <TextField id="phone_number" placeholder="+271-0099-221" fullWidth onChange={handleInputChange} />
+                <TextField id="phone_number" placeholder="+271-0099-221" fullWidth onChange={handleInputChange} value={formData.phone_number} />
               </Grid>
             </Grid>
-          </TabPanel>
-          <TabPanel value="3">
+          </Box>
+        );
+      case 2:
+        return (
+          <Box>
             <Grid container spacing={3}>
               <Grid item xs={12} lg={6}>
                 <CustomFormLabel htmlFor="document_number" className="center">
@@ -266,7 +311,7 @@ const FormTabs = () => {
                     <ErrorOutlineIcon />
                   </Tooltip>
                 </CustomFormLabel>
-                <TextField id="document_number" placeholder="A1234567" fullWidth onChange={handleInputChange} />
+                <TextField id="document_number" placeholder="A1234567" fullWidth onChange={handleInputChange} value={formData.document_number} />
 
                 <CustomFormLabel htmlFor="issuance_date" className="center">
                   Personal ID Issue Date
@@ -274,7 +319,7 @@ const FormTabs = () => {
                     <ErrorOutlineIcon />
                   </Tooltip>
                 </CustomFormLabel>
-                <TextField type="date" id="issuance_date" placeholder="" fullWidth onChange={handleInputChange} />
+                <TextField type="date" id="issuance_date" placeholder="" fullWidth onChange={handleInputChange} value={formData.issuance_date} />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <CustomFormLabel htmlFor="issuing_country" sx={{ mt: 2, mb: 2 }} className="center">
@@ -296,7 +341,7 @@ const FormTabs = () => {
                     <ErrorOutlineIcon />
                   </Tooltip>
                 </CustomFormLabel>
-                <OutlinedInput type="date" id="expiry_date" placeholder="" fullWidth onChange={handleInputChange} />
+                <OutlinedInput type="date" id="expiry_date" placeholder="" fullWidth onChange={handleInputChange} value={formData.expiry_date} />
               </Grid>
             </Grid>
             <Typography variant="h6" mb={2} mt={4}>
@@ -347,28 +392,93 @@ const FormTabs = () => {
                 </Box>
               )}
             </Box>
-          </TabPanel>
-          {/* <TabPanel value="4">
-            <div>
-              {!image ? (
-                <WebcamCapture onCapture={handleCapture} />
-              ) : (
-                <div>
-                  <h2>Captured Image:</h2>
-                  <img src={image} alt="Captured" />
-                  <button onClick={() => setImage(null)}>Retake</button>
-                </div>
-              )}
-            </div>
-          </TabPanel> */}
-        </TabContext>
-      </BlankCard>
-      <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3} mb={5}>
-        <Button variant="contained" color="primary" onClick={handleSubmit} disabled={!isFormValid()}>
-          Submit
-        </Button>
-      </Stack>
-    </div>
+          </Box>
+        );
+      case 3:
+        return (
+          <Box>
+            {!image ? (
+              <div>
+                {/* Uncomment the next line and import WebcamCapture when using */}
+                {/* <WebcamCapture onCapture={handleCapture} /> */}
+              </div>
+            ) : (
+              <div>
+                <h2>Captured Image:</h2>
+                <img src={image} alt="Captured" />
+                <button onClick={() => setImage(null)}>Retake</button>
+              </div>
+            )}
+          </Box>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <PageContainer>
+      <Breadcrumb title="KYC Application" description="this is KYC page" />
+      <ParentCard title='KYC'>
+        <Box width="100%">
+          <Stepper activeStep={activeStep}>
+            {steps.map((label, index) => {
+              const stepProps = {};
+              const labelProps = {};
+              if (isStepOptional(index)) {
+                labelProps.optional = <Typography variant="caption">Optional</Typography>;
+              }
+              if (isStepSkipped(index)) {
+                stepProps.completed = false;
+              }
+              return (
+                <Step key={label} {...stepProps}>
+                  <StepLabel {...labelProps}>{label}</StepLabel>
+                </Step>
+              );
+            })}
+          </Stepper>
+          {activeStep === steps.length ? (
+            <>
+              <Stack spacing={2} mt={3}>
+                <Alert severity='success' mt={2}>All steps completed - you&apos;re finished</Alert>
+
+                <Box textAlign="right">
+                  <Button onClick={handleReset} variant="contained" color="error">
+                    Reset
+                  </Button>
+                </Box>
+              </Stack>
+            </>
+          ) : (
+            <>
+              <Box>{handleSteps(activeStep)}</Box>
+
+              <Box display="flex" flexDirection="row" mt={3}>
+                <Button
+                  color="inherit"
+                  variant="contained"
+                  disabled={activeStep === 0}
+                  onClick={handleBack}
+                  sx={{ mr: 1 }}
+                >
+                  Back
+                </Button>
+                <Box flex="1 1 auto" />
+                <Button
+                  onClick={handleSubmitStep}
+                  variant="contained"
+                  color={activeStep === steps.length - 1 ? 'success' : 'secondary'}
+                  disabled={!isFormValid(activeStep)}
+                >
+                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                </Button>
+              </Box>
+            </>
+          )}
+        </Box>
+      </ParentCard>
+    </PageContainer>
   );
 };
 
