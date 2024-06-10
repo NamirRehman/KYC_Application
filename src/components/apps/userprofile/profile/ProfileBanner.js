@@ -55,9 +55,9 @@ const ProfileBanner = () => {
         ) : (
           <CardMedia component="img" image={profilecover} alt={profilecover} width="100%" />
         )}
-        <Grid container spacing={0} justifyContent="center" alignItems="center">
+        <Grid container spacing={0} justifyContent="space-between" alignItems="center">
           {/* Post | Followers | Following */}
-          <Grid
+          {/* <Grid
             item
             lg={4}
             sm={12}
@@ -106,7 +106,7 @@ const ProfileBanner = () => {
                 </Typography>
               </Box>
             </Stack>
-          </Grid>
+          </Grid> */}
           {/* about profile */}
           <Grid
             item
@@ -181,9 +181,9 @@ const ProfileBanner = () => {
               <Fab size="small" color="error" sx={{ backgroundColor: '#CD201F' }}>
                 <IconBrandYoutube size="18" />
               </Fab>
-              <Button color="primary" variant="contained">
+              {/* <Button color="primary" variant="contained">
                 Add To Story
-              </Button>
+              </Button> */}
             </Stack>
           </Grid>
         </Grid>

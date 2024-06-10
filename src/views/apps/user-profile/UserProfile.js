@@ -6,7 +6,7 @@ import ProfileBanner from 'src/components/apps/userprofile/profile/ProfileBanner
 import IntroCard from 'src/components/apps/userprofile/profile/IntroCard';
 import PhotosCard from 'src/components/apps/userprofile/profile/PhotosCard';
 import Post from 'src/components/apps/userprofile/profile/Post';
-
+import FormTabs from '../../../components/forms/form-horizontal/FormTabs';
 
 const UserProfile = () => {
   return (
@@ -21,16 +21,16 @@ const UserProfile = () => {
         <Grid item sm={12} lg={4} xs={12}>
           <Grid container spacing={3}>
             <Grid item sm={12}>
-              <IntroCard />
+              {/* <IntroCard /> */}
             </Grid>
-            <Grid item sm={12}>
+            {/* <Grid item sm={12}>
               <PhotosCard />
-            </Grid>
+            </Grid> */}
           </Grid>
         </Grid>
         {/* Posts Card */}
-        <Grid item sm={12} lg={8} xs={12}>
-          <Post />
+        <Grid item sm={12} lg={12} xs={12}>
+          <FormTabs />
         </Grid>
       </Grid>
     </PageContainer>
