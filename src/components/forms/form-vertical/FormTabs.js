@@ -3,14 +3,16 @@ import {
   Box,
   Button,
   Grid,
-  MenuItem,
   Stack,
   Tab,
   Typography,
   Select,
+  MenuItem,
   TextField,
   OutlinedInput,
-  Tooltip
+  Tooltip,
+  Checkbox,
+  FormControlLabel
 } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
@@ -30,12 +32,13 @@ const initialState = {
   email: '',
   given_name: '',
   birth_date: '',
-  age_over_18: '',
+  age_over_18: true,
   gender: '',
   issuance_date: '',
   expiry_date: '',
   resident_address: '',
   resident_country: '',
+  nationality: '',
   document_number: '',
   issuing_country: '',
   phone_number: '',
@@ -69,6 +72,14 @@ const FormTabs = () => {
     setDocumentPreview(URL.createObjectURL(file));
   };
 
+  const handleCheckboxChange = (e) => {
+    const { id, checked } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: checked,
+    }));
+  };
+
   const handleSelectChange = (id) => (event) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -77,7 +88,7 @@ const FormTabs = () => {
   };
 
   const isFormValid = () => {
-    return Object.values(formData).every((field) => field.trim() !== '');
+    return Object.values(formData).every((field) => field !== '' && field !== null);
   };
 
   const handleSubmit = () => {
@@ -97,6 +108,7 @@ const FormTabs = () => {
               <Tab label="Personal Details" value="1" />
               <Tab label="Address Details" value="2" />
               <Tab label="Document Details" value="3" />
+              <Tab label="Capture Image" value="4" />
             </TabList>
           </Box>
           <TabPanel value="1">
@@ -104,29 +116,54 @@ const FormTabs = () => {
               <Grid item xs={12} lg={6}>
                 <CustomFormLabel htmlFor="given_name" sx={{ mt: 2 }} className="center">
                   Given Name
-                  <Tooltip title="Current first name(s), including middle name(s), of the PID User." placement="top" cursor="pointer">
+                  <Tooltip title="Given and middle names" placement="top" cursor="pointer">
                     <ErrorOutlineIcon />
                   </Tooltip>
                 </CustomFormLabel>
                 <TextField id="given_name" placeholder="John" fullWidth onChange={handleInputChange} />
 
-                <CustomFormLabel htmlFor="birth_date" sx={{ mt: 2 }} className="center">
-                  Date of Birth
-                  <Tooltip title="Day, month, and year on which the PID User was born." placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField type="date" id="birth_date" fullWidth onChange={handleInputChange} />
+                <Grid container spacing={3}>
+                  <Grid item xs={6}>
+                    <CustomFormLabel htmlFor="birth_date" sx={{ mt: 2 }} className="center">
+                      Date of Birth
+                      <Tooltip title="Day, month, and year on which the PID User was born." placement="top" cursor="pointer">
+                        <ErrorOutlineIcon />
+                      </Tooltip>
+                    </CustomFormLabel>
+                    <TextField type="date" id="birth_date" fullWidth onChange={handleInputChange} />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <CustomFormLabel htmlFor="age_over_18" sx={{ mt: 2 }} className="center">
+                      Age Over 18
+                      <Tooltip title="Attesting whether the PID User is currently an adult (true) or a minor (false)." placement="top" cursor="pointer">
+                        <ErrorOutlineIcon />
+                      </Tooltip>
+                    </CustomFormLabel>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          id="age_over_18"
+                          checked={formData.age_over_18}
+                          onChange={handleCheckboxChange}
+                        />
+                      }
+                      label="I am over 18 years old"
+                    />
+                  </Grid>
+                </Grid>
 
-                <CustomFormLabel htmlFor="age_over_18" sx={{ mt: 2 }} className="center">
-                  Age Over 18
-                  <Tooltip title="Attesting whether the PID User is currently an adult (true) or a minor (false)." placement="top" cursor="pointer">
+                <CustomFormLabel htmlFor="nationality" sx={{ mt: 2 }} className="center">
+                  Nationality
+                  <Tooltip title="Select one or multiple Nationalities" placement="top" cursor="pointer">
                     <ErrorOutlineIcon />
                   </Tooltip>
                 </CustomFormLabel>
-                <Select id="age_over_18" fullWidth onChange={handleSelectChange('age_over_18')} value={formData.age_over_18}>
-                  <MenuItem value="true">True</MenuItem>
-                  <MenuItem value="false">False</MenuItem>
+                <Select id="nationality" fullWidth onChange={handleSelectChange('nationality')} value={formData.nationality}>
+                  {countries.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
                 </Select>
 
               </Grid>
@@ -138,7 +175,7 @@ const FormTabs = () => {
                   </Tooltip>
                 </CustomFormLabel>
                 <TextField id="family_name" placeholder="Doe" fullWidth onChange={handleInputChange} />
-                
+
                 <CustomFormLabel htmlFor="birth_place" sx={{ mt: 2 }} className="center">
                   Birth Place
                   <Tooltip title="The country, state, and city where the PID User was born." placement="top" cursor="pointer">
@@ -157,7 +194,6 @@ const FormTabs = () => {
                   <MenuItem value="0">Not known</MenuItem>
                   <MenuItem value="1">Male</MenuItem>
                   <MenuItem value="2">Female</MenuItem>
-                  <MenuItem value="9">Not applicable</MenuItem>
                 </Select>
               </Grid>
             </Grid>
@@ -171,7 +207,14 @@ const FormTabs = () => {
                     <ErrorOutlineIcon />
                   </Tooltip>
                 </CustomFormLabel>
-                <TextField id="resident_address" placeholder="123 Main St" fullWidth onChange={handleInputChange} />
+                <TextField
+                  id="resident_address"
+                  placeholder="123 Main St"
+                  fullWidth
+                  onChange={handleInputChange}
+                  multiline
+                  rows={4}
+                />
 
                 <CustomFormLabel htmlFor="email" className="center">
                   Email Address
@@ -215,7 +258,7 @@ const FormTabs = () => {
             </Grid>
           </TabPanel>
           <TabPanel value="3">
-          <Grid container spacing={3}>
+            <Grid container spacing={3}>
               <Grid item xs={12} lg={6}>
                 <CustomFormLabel htmlFor="document_number" className="center">
                   Document Number
@@ -234,7 +277,7 @@ const FormTabs = () => {
                 <TextField type="date" id="issuance_date" placeholder="" fullWidth onChange={handleInputChange} />
               </Grid>
               <Grid item xs={12} lg={6}>
-                <CustomFormLabel htmlFor="issuing_country" sx={{ mt: 2, mb:2 }} className="center">
+                <CustomFormLabel htmlFor="issuing_country" sx={{ mt: 2, mb: 2 }} className="center">
                   Issuing Country
                   <Tooltip title="Alpha-2 country code, as defined in ISO 3166-1, of the PID Provider's country or territory." placement="top" cursor="pointer">
                     <ErrorOutlineIcon />
@@ -295,16 +338,29 @@ const FormTabs = () => {
                 id="file-upload"
                 style={{ display: 'none' }}
               />
-              <label htmlFor="file-upload" style={{ cursor: 'pointer',fontWeight: 'bold' }}>
+              <label htmlFor="file-upload" style={{ cursor: 'pointer', fontWeight: 'bold' }}>
                 Drag and drop file OR &nbsp;<span style={{ color: '#1976d2', textDecoration: 'underline' }}>SELECT</span>
               </label>
               {documentPreview && (
                 <Box mt={2}>
-                  <img src={documentPreview} alt="Document Preview" style={{ width: '100%', maxWidth: '150px',maxHeight: '150px',height: 'auto', borderRadius: '10px', border: '1px solid #ccc' }} />
+                  <img src={documentPreview} alt="Document Preview" style={{ width: '100%', maxWidth: '150px', maxHeight: '150px', height: 'auto', borderRadius: '10px', border: '1px solid #ccc' }} />
                 </Box>
               )}
             </Box>
           </TabPanel>
+          {/* <TabPanel value="4">
+            <div>
+              {!image ? (
+                <WebcamCapture onCapture={handleCapture} />
+              ) : (
+                <div>
+                  <h2>Captured Image:</h2>
+                  <img src={image} alt="Captured" />
+                  <button onClick={() => setImage(null)}>Retake</button>
+                </div>
+              )}
+            </div>
+          </TabPanel> */}
         </TabContext>
       </BlankCard>
       <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3} mb={5}>
