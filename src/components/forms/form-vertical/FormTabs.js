@@ -265,14 +265,6 @@ const FormTabs = () => {
                   </Tooltip>
                 </CustomFormLabel>
                 <TextField id="email" placeholder="user@gmail.com" fullWidth onChange={handleInputChange} value={formData.email} />
-
-                <CustomFormLabel htmlFor="openchat_id" sx={{ mt: 2 }} className="center">
-                  OpenChat ID
-                  <Tooltip title="Your OpenChat ID" placement="top" cursor="pointer">
-                    <ErrorOutlineIcon />
-                  </Tooltip>
-                </CustomFormLabel>
-                <TextField id="openchat_id" fullWidth onChange={handleInputChange} value={formData.openchat_id} />
               </Grid>
               <Grid item xs={12} lg={6}>
                 <CustomFormLabel htmlFor="resident_country" sx={{ mt: 3 }} className="center">
@@ -296,6 +288,15 @@ const FormTabs = () => {
                   </Tooltip>
                 </CustomFormLabel>
                 <TextField id="phone_number" placeholder="+271-0099-221" fullWidth onChange={handleInputChange} value={formData.phone_number} />
+
+                
+                <CustomFormLabel htmlFor="openchat_id" sx={{ mt: 2 }} className="center">
+                  OpenChat ID
+                  <Tooltip title="Your OpenChat ID" placement="top" cursor="pointer">
+                    <ErrorOutlineIcon />
+                  </Tooltip>
+                </CustomFormLabel>
+                <TextField id="openchat_id" fullWidth onChange={handleInputChange} value={formData.openchat_id} />
               </Grid>
             </Grid>
           </Box>
