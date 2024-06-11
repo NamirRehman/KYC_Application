@@ -291,7 +291,7 @@ const FormTabs = () => {
 
                 
                 <CustomFormLabel htmlFor="openchat_id" sx={{ mt: 2 }} className="center">
-                  OpenChat ID
+                  OpenChat Invite Link
                   <Tooltip title="Your OpenChat ID" placement="top" cursor="pointer">
                     <ErrorOutlineIcon />
                   </Tooltip>
